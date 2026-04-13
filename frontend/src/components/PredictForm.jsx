@@ -1,0 +1,286 @@
+import { useState } from "react";
+import { predictChurn } from "../services/api";
+import Resultado from "./Resultado";
+
+const LIMITE_MAXIMO = 10_000_000_000_000; 
+
+export default function PredictForm(onVerHistorico) {
+  const [formData, setFormData] = useState({
+    pais: "", 
+    genero: "", 
+    idade: "",
+    num_produtos: "",
+    membro_ativo: true, 
+    saldo: "",
+    salario_estimado: "",
+  });
+
+  const [resultado, setResultado] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  // Manipula mudanças nos inputs (Texto, Número e Checkbox)
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    // Checkbox
+    if (type === "checkbox") {
+      setFormData({
+        ...formData,
+        [name]: checked,
+      });
+      return;
+    }
+
+    // Campos numéricos
+    if (type === "number") {
+      // Permite limpar o campo
+      if (value === "") {
+        setFormData({ ...formData, [name]: "" });
+        setErro(null);
+        return;
+      }
+
+      const numero = Number(value);
+      if (isNaN(numero)) return;
+
+      // Limite apenas para saldo e salário
+      if (
+        (name === "saldo" || name === "salario_estimado") &&
+        numero > LIMITE_MAXIMO
+      ) {
+        setErro(
+          `${
+            name === "saldo" ? "Saldo" : "Salário"
+          } máximo permitido: € 10 trilhões`
+        );
+        return;
+      }
+
+      setErro(null);
+      setFormData({
+        ...formData,
+        [name]: numero,
+      });
+      return;
+    }
+
+    // Texto / select
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleClear = () => {
+    setFormData({
+      pais: "",
+      genero: "",
+      idade: "",
+      num_produtos: "",
+      membro_ativo: true,
+      saldo: "",
+      salario_estimado: "",
+    });
+
+    setResultado(null);
+    setErro(null);
+    setLoading(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErro(null);
+    setResultado(null);
+
+    try {
+      // Monta o payload exatamente como o Java DTO espera
+      // Nota: O Java vai filtrar o que manda pro Python, mas precisa receber no DTO
+      const payload = {
+        pais: formData.pais,
+        genero: formData.genero,
+        idade: Number(formData.idade),
+        num_produtos: Number(formData.num_produtos),
+        membro_ativo: formData.membro_ativo, // Envia true/false
+        saldo: Number(formData.saldo),
+        salario_estimado: Number(formData.salario_estimado),
+      };
+
+      const response = await predictChurn(payload);
+      setResultado(response);
+    } catch (err) {
+      console.error(err);
+      setErro(
+        "Erro ao conectar com o backend. Verifique se o Docker está rodando."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="container anime-expand">
+      {/* Cabeçalho */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "column",
+          alignItems: "center",
+          gap: "24px",
+          marginBottom: "24px",
+          gap: "10px",
+        }}
+      >
+        <img
+          src="./FicaAI_logo.png"
+          style={{ 
+            width: "80px",       // Um tamanho que não fique gigante
+            height: "80px", 
+            borderRadius: "16px", // Arredonda os cantos (fica muito mais moderno!)
+            boxShadow: "0 4px 10px rgba(0,0,0,0.15)" // Uma sombrinha leve para destacar
+        }}
+        />
+        <h1 style={{ margin: 0 }}>Previsão de Churn Bancário</h1>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        {/* --- DADOS DEMOGRÁFICOS --- */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="pais">País</label>
+            <select
+              id="pais"
+              name="pais"
+              value={formData.pais}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+              data-lpignore="true"
+            >
+              <option value="" disabled hidden>
+                Selecionar
+              </option>
+              <option value="France">França (France)</option>
+              <option value="Spain">Espanha (Spain)</option>
+              <option value="Germany">Alemanha (Germany)</option>
+            </select>
+          </div>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="genero">Gênero</label>
+            <select
+              id="genero"
+              name="genero"
+              value={formData.genero}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled hidden>
+                Selecionar
+              </option>
+              <option value="Male">Masculino (Male)</option>
+              <option value="Female">Feminino (Female)</option>
+            </select>
+          </div>
+        </div>
+
+        <label htmlFor="idade">Idade</label>
+        <input
+          id="idade"
+          type="number"
+          name="idade"
+          value={formData.idade}
+          onChange={handleChange}
+          placeholder="Ex: 35"
+          min="18"
+          required
+          max="120"
+        />
+
+        {/* --- DADOS FINANCEIROS --- */}
+        <label htmlFor="saldo">Saldo em Conta (€)</label>
+        <input
+          id="saldo"
+          type="number"
+          name="saldo"
+          value={formData.saldo}
+          onChange={handleChange}
+          placeholder="Ex: 85000.50"
+          step="0.01"
+          min={0}
+          max={LIMITE_MAXIMO}
+          required
+        />
+
+        <label htmlFor="salario_estimado">Salário Estimado (€)</label>
+        <input
+          id="salario_estimado"
+          type="number"
+          name="salario_estimado"
+          value={formData.salario_estimado}
+          onChange={handleChange}
+          placeholder="Ex: 60000.00"
+          step="0.01"
+          min={0}
+          max={LIMITE_MAXIMO}
+          required
+        />
+
+        <label htmlFor="num_produtos">Número de Produtos</label>
+        <input
+          id="num_produtos"
+          type="number"
+          name="num_produtos"
+          value={formData.num_produtos}
+          onChange={handleChange}
+          placeholder="Ex: 1 ou 2"
+          min="1"
+          max="4"
+          required
+        />
+
+        {/* --- CHECKBOX --- */}
+        <div
+          style={{
+            margin: "15px 0",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <input
+            type="checkbox"
+            id="membro_ativo"
+            name="membro_ativo"
+            checked={formData.membro_ativo}
+            onChange={handleChange}
+            style={{ width: "20px", height: "20px" }}
+          />
+          <label
+            htmlFor="membro_ativo"
+            style={{ margin: 0, cursor: "pointer" }}
+          >
+            Cliente é um Membro Ativo?
+          </label>
+        </div>
+
+        {/* --- AÇÕES --- */}
+        <div
+          className="actions"
+          style={{ marginTop: "20px", display: "flex", gap: "10px" }}
+        >
+          <button type="submit" disabled={loading}>
+            {loading ? "Processando..." : "Prever Churn"}
+          </button>
+
+          <button type="button" className="secondary" onClick={handleClear}>
+            Limpar
+          </button>
+        </div>
+      </form>
+
+      {erro && <div className="error">{erro}</div>}
+      {resultado && <Resultado resultado={resultado} />}
+    </div>
+  );
+}
