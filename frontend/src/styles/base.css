@@ -1,0 +1,38 @@
+/* Base Resets */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+h1, .app-title, .logo-text {
+    font-weight: 700; /* Bold (ChurnInsight) */
+    letter-spacing: -0.5px;
+    color: var(--text-main); /* Título principal branco ou azul, conforme preferir */
+}
+
+h2, h3, .subtitle {
+    font-weight: 300; /* Light (Prediction) */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary-neon); /* Azul #64C8FF */
+    text-shadow: 0 0 10px rgba(100, 200, 255, 0.3); /* Glow */
+}
+
+a {
+  color: var(--primary-neon);
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+a:hover {
+  color: var(--ice-blue);
+  text-shadow: 0 0 8px var(--primary-neon);
+}

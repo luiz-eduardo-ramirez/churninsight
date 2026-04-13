@@ -1,0 +1,111 @@
+@keyframes expandirEntrada {
+  0% {
+    opacity: 0;
+    transform: scale(0.9); /* Começa um pouco menor (90%) */
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);   /* Termina no tamanho real (100%) */
+  }
+}
+
+.anime-expand {
+  /* Aplica a animação definida acima */
+  animation: expandirEntrada 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  
+  /* Garante que o ponto de origem da expansão seja o centro */
+  transform-origin: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.form-row > div {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--primary-neon);
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+/* Inputs e Selects */
+input, select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(176, 196, 222, 0.2);
+  background-color: var(--input-bg);
+  color: var(--text-main);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  appearance: none;
+}
+
+select option {
+    background-color: #151e32; /* var(--card-bg) - Fundo escuro */
+    color: #F0F8FF;            /* var(--text-main) - Texto claro */
+    padding: 10px;
+}
+
+/* Ícone do Select customizado */
+select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300CFFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+/* Foco */
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary-neon);
+  box-shadow: 0 0 12px rgba(0, 207, 255, 0.3);
+  background-color: rgba(0, 207, 255, 0.05);
+}
+
+/* Checkbox container */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.3s;
+}
+.checkbox-container:hover {
+    border-color: var(--secondary-blue);
+    background: rgba(255,255,255,0.05);
+}
+
+input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: auto; 
+  width: 20px; 
+  height: 20px;
+  padding: 0; 
+  background-color: transparent; 
+  border: none;
+  accent-color: var(--primary-neon); 
+  cursor: pointer;
+  margin: 0; 
+}
